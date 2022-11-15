@@ -1,32 +1,29 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+import { ref } from "vue";
+import { getBitcoinPrice, formatToCurrency } from "./utils";
+
+async function storeBitcoinPrice() {
+  const price = await getBitcoinPrice();
+
+  bitcoinPrice.value = price;
+}
+
+const bitcoinPrice = ref(0);
+
+storeBitcoinPrice();
+setInterval(storeBitcoinPrice, 2000);
 </script>
 
 <template>
   <header>
-    <HelloWorld msg="Hello, Cleberson!" />
+    <h1>Bitcoin</h1>
+    <p>Price: {{ formatToCurrency(bitcoinPrice) }}</p>
   </header>
 </template>
 
 <style scoped>
 header {
   line-height: 1.5;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    justify-content: center;
-    place-items: center;
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
+  text-align: center;
 }
 </style>
