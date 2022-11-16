@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { getBitcoinPrice, formatToCurrency } from "./utils";
+import { getBitcoinPrice, formatToCurrency, getBitcoinHistory } from "./utils";
+
+let bitcoinDate: string;
+let realtimePriceInterval: any;
+const bitcoinPrice = ref(0);
 
 async function storeBitcoinPrice() {
   const price = await getBitcoinPrice();
@@ -8,16 +12,37 @@ async function storeBitcoinPrice() {
   bitcoinPrice.value = price;
 }
 
-const bitcoinPrice = ref(0);
+function clearRealtimePriceInterval() {
+  clearInterval(realtimePriceInterval);
+  realtimePriceInterval = undefined;
+}
+
+function startRealtimePriceInterval() {
+  realtimePriceInterval = setInterval(storeBitcoinPrice, 5000);
+}
+
+function searchHistory() {
+  clearRealtimePriceInterval();
+
+  const [yyyy, mm, dd] = bitcoinDate.split("-");
+  const correctDateString = [dd, mm, yyyy].join("-");
+
+  getBitcoinHistory(correctDateString).then((price) => {
+    bitcoinPrice.value = price;
+  });
+}
 
 storeBitcoinPrice();
-setInterval(storeBitcoinPrice, 2000);
+startRealtimePriceInterval();
 </script>
 
 <template>
   <header>
     <h1>Bitcoin</h1>
     <p>Price: {{ formatToCurrency(bitcoinPrice) }}</p>
+    <input type="date" v-model="bitcoinDate" />
+    <button @click="searchHistory">Search</button>
+    <button @click="startRealtimePriceInterval">Real-Time Price</button>
   </header>
 </template>
 
