@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { getCoinCurrentPrice, formatToCurrency, searcHistoricalPrice } from "./utils";
+import {
+  getCoinCurrentPrice,
+  formatToCurrency,
+  searcHistoricalPrice,
+} from "./utils";
 
 let coinDate: string;
 let realtimePriceInterval: any;
@@ -12,20 +16,20 @@ const supportedCoins = [
     symbol: "btc",
   },
   {
-    id: 'ethereum',
-    symbol: 'eth', 
+    id: "ethereum",
+    symbol: "eth",
   },
   {
     id: "dacxi",
     symbol: "dacxi",
   },
   {
-    id: 'cosmos',
-    symbol: 'atom', 
+    id: "cosmos",
+    symbol: "atom",
   },
   {
-    id: 'terra-luna-2',
-    symbol: 'luna', 
+    id: "terra-luna-2",
+    symbol: "luna",
   },
 ];
 
@@ -65,7 +69,12 @@ startRealtimePriceInterval();
   <header>
     <div class="flex items-center justify-center">
       <div :key="coin.id" v-for="coin in supportedCoins">
-        <input :value="coin.id" type="radio" name="coin" v-model="selectedCoin" />
+        <input
+          :value="coin.id"
+          type="radio"
+          name="coin"
+          v-model="selectedCoin"
+        />
         <label>{{ coin.symbol.toUpperCase() }}</label>
       </div>
     </div>
