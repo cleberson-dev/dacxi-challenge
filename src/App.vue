@@ -38,7 +38,7 @@ startRealtimePriceInterval();
 
 <template>
   <header>
-    <h1>Bitcoin</h1>
+    <h1 class="font-bold underline">Bitcoin</h1>
     <p>Price: {{ formatToCurrency(bitcoinPrice) }}</p>
     <input type="date" v-model="bitcoinDate" />
     <button @click="searchHistory">Search</button>
