@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { getBitcoinPrice, formatToCurrency, getBitcoinHistory } from "./utils";
+import { getCoinCurrentPrice, formatToCurrency, searcHistoricalPrice } from "./utils";
 
-let bitcoinDate: string;
+let coinDate: string;
 let realtimePriceInterval: any;
-let selectedCoin: string;
+let selectedCoin: string = "bitcoin";
 
 const supportedCoins = [
   {
@@ -29,12 +29,12 @@ const supportedCoins = [
   },
 ];
 
-const bitcoinPrice = ref(0);
+const coinPrice = ref(0);
 
-async function storeBitcoinPrice() {
-  const price = await getBitcoinPrice();
+async function storeCoinPrice() {
+  const price = await getCoinCurrentPrice(selectedCoin);
 
-  bitcoinPrice.value = price;
+  coinPrice.value = price;
 }
 
 function clearRealtimePriceInterval() {
@@ -43,20 +43,18 @@ function clearRealtimePriceInterval() {
 }
 
 function startRealtimePriceInterval() {
-  storeBitcoinPrice();
-  realtimePriceInterval = setInterval(storeBitcoinPrice, 5000);
+  storeCoinPrice();
+  realtimePriceInterval = setInterval(storeCoinPrice, 5000);
 }
 
 function searchHistory() {
   clearRealtimePriceInterval();
 
-  alert(selectedCoin);
-
-  const [yyyy, mm, dd] = bitcoinDate.split("-");
+  const [yyyy, mm, dd] = coinDate.split("-");
   const correctDateString = [dd, mm, yyyy].join("-");
 
-  getBitcoinHistory(correctDateString).then((price) => {
-    bitcoinPrice.value = price;
+  searcHistoricalPrice(selectedCoin, correctDateString).then((price) => {
+    coinPrice.value = price;
   });
 }
 
@@ -71,9 +69,9 @@ startRealtimePriceInterval();
         <label>{{ coin.symbol.toUpperCase() }}</label>
       </div>
     </div>
-    <h1 class="font-bold underline">Bitcoin</h1>
-    <p>Price: {{ formatToCurrency(bitcoinPrice) }}</p>
-    <input type="date" v-model="bitcoinDate" />
+    <h1 class="font-bold underline">{{ selectedCoin }}</h1>
+    <p>Price: {{ formatToCurrency(coinPrice) }}</p>
+    <input type="date" v-model="coinDate" />
     <button @click="searchHistory">Search</button>
     <button @click="startRealtimePriceInterval">Real-Time Price</button>
   </header>
