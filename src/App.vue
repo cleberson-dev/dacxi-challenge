@@ -6,10 +6,6 @@ import {
   searcHistoricalPrice,
 } from "./utils";
 
-let coinDate: string;
-let realtimePriceInterval: any;
-let selectedCoin: string = "bitcoin";
-
 const supportedCoins = [
   {
     id: "bitcoin",
@@ -33,22 +29,28 @@ const supportedCoins = [
   },
 ];
 
+let coinDate: string;
+let realtimePriceInterval: any;
+let selectedCoin = supportedCoins[0];
+
 const coinPrice = ref(0);
+const isRealtime = ref(true);
 
 async function storeCoinPrice() {
-  const price = await getCoinCurrentPrice(selectedCoin);
-
+  const price = await getCoinCurrentPrice(selectedCoin.id);
   coinPrice.value = price;
 }
 
 function clearRealtimePriceInterval() {
   clearInterval(realtimePriceInterval);
   realtimePriceInterval = undefined;
+  isRealtime.value = false;
 }
 
 function startRealtimePriceInterval() {
   storeCoinPrice();
   realtimePriceInterval = setInterval(storeCoinPrice, 5000);
+  isRealtime.value = true;
 }
 
 function searchHistory() {
@@ -57,7 +59,7 @@ function searchHistory() {
   const [yyyy, mm, dd] = coinDate.split("-");
   const correctDateString = [dd, mm, yyyy].join("-");
 
-  searcHistoricalPrice(selectedCoin, correctDateString).then((price) => {
+  searcHistoricalPrice(selectedCoin.id, correctDateString).then((price) => {
     coinPrice.value = price;
   });
 }
@@ -66,24 +68,32 @@ startRealtimePriceInterval();
 </script>
 
 <template>
-  <header>
-    <div class="flex items-center justify-center">
+  <main class="flex flex-col h-screen justify-center items-center">
+    <div class="flex gap-x-2">
+      <button
+        @click="startRealtimePriceInterval"
+        class="select-none cursor-pointer disabled:cursor-default"
+        :class="{ 'text-red-600': isRealtime }"
+        :disabled="isRealtime"
+      >
+        LIVE
+      </button>
+    </div>
+
+    <p class="text-5xl font-bold text-purple-500 mb-4">
+      {{ formatToCurrency(coinPrice) }}
+    </p>
+
+    <button class="" @click="searchHistory">Search</button>
+    <input class="rounded text-black" type="date" v-model="coinDate" />
+
+    <div class="flex items-center justify-center mt-4">
       <div :key="coin.id" v-for="coin in supportedCoins">
-        <input
-          :value="coin.id"
-          type="radio"
-          name="coin"
-          v-model="selectedCoin"
-        />
+        <input type="radio" name="coin" :value="coin" v-model="selectedCoin" />
         <label>{{ coin.symbol.toUpperCase() }}</label>
       </div>
     </div>
-    <h1 class="font-bold underline">{{ selectedCoin }}</h1>
-    <p>Price: {{ formatToCurrency(coinPrice) }}</p>
-    <input type="date" v-model="coinDate" />
-    <button @click="searchHistory">Search</button>
-    <button @click="startRealtimePriceInterval">Real-Time Price</button>
-  </header>
+  </main>
 </template>
 
 <style scoped>
