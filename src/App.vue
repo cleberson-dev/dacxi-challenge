@@ -18,6 +18,7 @@ function clearRealtimePriceInterval() {
 }
 
 function startRealtimePriceInterval() {
+  storeBitcoinPrice();
   realtimePriceInterval = setInterval(storeBitcoinPrice, 5000);
 }
 
@@ -32,7 +33,6 @@ function searchHistory() {
   });
 }
 
-storeBitcoinPrice();
 startRealtimePriceInterval();
 </script>
 

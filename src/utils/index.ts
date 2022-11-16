@@ -18,7 +18,7 @@ export function formatToCurrency(value: number): string {
 
 // dateString should be in format dd-mm-yyyy
 export async function getBitcoinHistory(dateString: string): Promise<number> {
-  const URL = `${API_URL}/Coins/bitcoin/history?date=${dateString}`;
+  const URL = `${API_URL}/coins/bitcoin/history?date=${dateString}`;
 
   const res = await fetch(URL);
   const data = await res.json();
