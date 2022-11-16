@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import {
   getCoinCurrentPrice,
   formatToCurrency,
@@ -29,12 +29,18 @@ const supportedCoins = [
   },
 ];
 
-let coinDate: string;
 let realtimePriceInterval: any;
 let selectedCoin = supportedCoins[0];
 
 const coinPrice = ref(0);
+const coinDate = ref("");
 const isRealtime = ref(true);
+
+const isValidDate = computed(() => {
+  console.log({ coinDate: coinDate.value });
+
+  return !!coinDate.value.match(/\d{4}-\d{2}-\d{2}/);
+});
 
 async function storeCoinPrice() {
   const price = await getCoinCurrentPrice(selectedCoin.id);
@@ -51,12 +57,13 @@ function startRealtimePriceInterval() {
   storeCoinPrice();
   realtimePriceInterval = setInterval(storeCoinPrice, 5000);
   isRealtime.value = true;
+  coinDate.value = "";
 }
 
 function searchHistory() {
   clearRealtimePriceInterval();
 
-  const [yyyy, mm, dd] = coinDate.split("-");
+  const [yyyy, mm, dd] = coinDate.value.split("-");
   const correctDateString = [dd, mm, yyyy].join("-");
 
   searcHistoricalPrice(selectedCoin.id, correctDateString).then((price) => {
@@ -84,8 +91,14 @@ startRealtimePriceInterval();
       {{ formatToCurrency(coinPrice) }}
     </p>
 
-    <button class="" @click="searchHistory">Search</button>
     <input class="rounded text-black" type="date" v-model="coinDate" />
+    <button
+      class="disabled:opacity-25 disabled:cursor-default cursor-pointer mt-2 bg-slate-300 text-black px-3 py rounded"
+      @click="searchHistory"
+      :disabled="!isValidDate"
+    >
+      Search
+    </button>
 
     <div class="flex items-center justify-center mt-4">
       <div :key="coin.id" v-for="coin in supportedCoins">
