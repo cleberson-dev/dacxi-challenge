@@ -78,6 +78,32 @@ startRealtimePriceInterval();
 
 <template>
   <main class="flex flex-col h-screen justify-center items-center">
+    <div class="flex items-center justify-center mb-4 bg-white/10 rounded">
+      <div
+        :key="coin.id"
+        v-for="coin in supportedCoins"
+        class="p-2"
+        :class="{ 'bg-black/40': coin.id === selectedCoin.id }"
+      >
+        <input
+          type="radio"
+          name="coin"
+          v-model="selectedCoin"
+          :id="'coin-' + coin.id"
+          :value="coin"
+          class="hidden"
+        />
+        <label
+          :for="'coin-' + coin.id"
+          class="cursor-pointer font-semibold"
+          :class="{
+            'text-purple-500 cursor-default': coin.id === selectedCoin.id,
+          }"
+          >{{ coin.symbol.toUpperCase() }}</label
+        >
+      </div>
+    </div>
+
     <div class="flex gap-x-2">
       <button
         @click="startRealtimePriceInterval"
@@ -106,32 +132,6 @@ startRealtimePriceInterval();
     >
       Search
     </button>
-
-    <div class="flex items-center justify-center mt-4 bg-white/10 rounded">
-      <div
-        :key="coin.id"
-        v-for="coin in supportedCoins"
-        class="p-2"
-        :class="{ 'bg-black/40': coin.id === selectedCoin.id }"
-      >
-        <input
-          type="radio"
-          name="coin"
-          v-model="selectedCoin"
-          :id="'coin-' + coin.id"
-          :value="coin"
-          class="hidden"
-        />
-        <label
-          :for="'coin-' + coin.id"
-          class="cursor-pointer font-semibold"
-          :class="{
-            'text-purple-500 cursor-default': coin.id === selectedCoin.id,
-          }"
-          >{{ coin.symbol.toUpperCase() }}</label
-        >
-      </div>
-    </div>
   </main>
 </template>
 
