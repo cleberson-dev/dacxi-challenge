@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
 import ButtonGroup from "./components/ButtonGroup.vue";
+import CustomButton from "./components/CustomButton.vue";
 import {
   getCoinCurrentPrice,
   formatToCurrency,
@@ -141,13 +142,11 @@ startRealtimePriceInterval();
         type="date"
         v-model="coinDate"
       />
-      <button
-        class="disabled:opacity-40 disabled:cursor-default font-semibold cursor-pointer mt-2 bg-blue-500 text-black px-4 py-1 rounded"
+      <CustomButton
+        title="Search"
         @click="searchHistory"
         :disabled="!isValidDate"
-      >
-        Search
-      </button>
+      />
     </div>
   </main>
 </template>
