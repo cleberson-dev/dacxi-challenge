@@ -48,18 +48,17 @@ const formattedCoinPriceDate = computed(() => {
   return shownCoinPriceDate.value.toISOString();
 });
 
-const isValidDate = computed(() => {
-  console.log({ coinDate: coinDate.value });
-
-  return !!coinDate.value.match(/\d{4}-\d{2}-\d{2}/);
-});
+const isValidDate = computed(() => !!coinDate.value.match(/\d{4}-\d{2}-\d{2}/));
 
 watch(selectedCoinId, () => {
   isLoadingCoinPrice.value = true;
+
   if (isRealtime.value) return;
 
   searchHistory();
 });
+
+startRealtimePriceInterval();
 
 async function storeCoinPrice() {
   if (!isRealtime.value) return;
@@ -100,8 +99,6 @@ function searchHistory() {
     }
   );
 }
-
-startRealtimePriceInterval();
 </script>
 
 <template>
@@ -150,10 +147,3 @@ startRealtimePriceInterval();
     </div>
   </main>
 </template>
-
-<style scoped>
-header {
-  line-height: 1.5;
-  text-align: center;
-}
-</style>
