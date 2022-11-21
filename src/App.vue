@@ -10,6 +10,10 @@ import {
 import { supportedCoins } from "./data";
 
 let realtimePriceInterval: any;
+const supportedCoinsButtonGroupItems = supportedCoins.map((coin) => ({
+  id: coin.id,
+  label: coin.symbol,
+}));
 
 const isLoadingCoinPrice = ref(true);
 const coinPrice = ref(0);
@@ -18,12 +22,25 @@ const isRealtime = ref(true);
 const selectedCoinId = ref(supportedCoins[0].id);
 const shownCoinPriceDate = ref<Date>();
 
+const formattedCoinPrice = computed(() => {
+  if (isLoadingCoinPrice.value) return "----";
+
+  return formatToCurrency(coinPrice.value);
+});
+
 const formattedCoinPriceDate = computed(() => {
   if (!shownCoinPriceDate.value) return "----";
 
-  if (!isRealtime.value) return shownCoinPriceDate.value.toLocaleDateString();
-
-  return shownCoinPriceDate.value.toISOString();
+  return shownCoinPriceDate.value.toLocaleDateString(
+    "pt-BR",
+    isRealtime.value
+      ? {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        }
+      : undefined
+  );
 });
 
 const isValidDate = computed(() => !!coinDate.value.match(/\d{4}-\d{2}-\d{2}/));
@@ -57,11 +74,12 @@ function clearRealtimePriceInterval() {
 function startRealtimePriceInterval() {
   storeCoinPrice();
   realtimePriceInterval = setInterval(storeCoinPrice, 5000);
+
   isRealtime.value = true;
   coinDate.value = "";
 }
 
-function searchHistory() {
+async function searchHistory() {
   clearRealtimePriceInterval();
 
   isLoadingCoinPrice.value = true;
@@ -69,13 +87,14 @@ function searchHistory() {
   const [yyyy, mm, dd] = coinDate.value.split("-");
   const correctDateString = [dd, mm, yyyy].join("-");
 
-  searcHistoricalPrice(selectedCoinId.value, correctDateString).then(
-    (price) => {
-      coinPrice.value = price;
-      shownCoinPriceDate.value = new Date(+yyyy, +mm - 1, +dd);
-      isLoadingCoinPrice.value = false;
-    }
+  const newPrice = await searcHistoricalPrice(
+    selectedCoinId.value,
+    correctDateString
   );
+
+  coinPrice.value = newPrice;
+  shownCoinPriceDate.value = new Date(+yyyy, +mm - 1, +dd);
+  isLoadingCoinPrice.value = false;
 }
 </script>
 
@@ -83,25 +102,23 @@ function searchHistory() {
   <main class="flex flex-col h-screen justify-center items-center">
     <ButtonGroup
       v-model="selectedCoinId"
-      :items="
-        supportedCoins.map((coin) => ({ id: coin.id, label: coin.symbol }))
-      "
+      :items="supportedCoinsButtonGroupItems"
     />
 
     <div
       class="flex flex-col items-center p-8 my-4 w-full rounded border border-solid border-white/5"
     >
       <button
+        :disabled="isRealtime"
         @click="startRealtimePriceInterval"
         class="select-none cursor-pointer font-semibold disabled:cursor-default"
         :class="{ 'text-red-600': isRealtime }"
-        :disabled="isRealtime"
       >
         LIVE
       </button>
 
-      <p class="text-5xl font-bold text-purple-500 mb-2">
-        {{ isLoadingCoinPrice ? "----" : formatToCurrency(coinPrice) }}
+      <p class="text-5xl text-purple-500 font-bold mb-2">
+        {{ formattedCoinPrice }}
       </p>
 
       <p class="opacity-40">
@@ -111,12 +128,7 @@ function searchHistory() {
 
     <div class="flex flex-col items-center">
       <label>Pick a date</label>
-      <input
-        class="rounded p-2"
-        :style="{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }"
-        type="date"
-        v-model="coinDate"
-      />
+      <input type="date" v-model="coinDate" class="rounded p-2 bg-white/5" />
       <CustomButton
         title="Search"
         @click="searchHistory"
