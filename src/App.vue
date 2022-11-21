@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
+import Selector from "./components/Selector.vue";
 import {
   getCoinCurrentPrice,
   formatToCurrency,
@@ -30,11 +31,11 @@ const supportedCoins = [
 ];
 
 let realtimePriceInterval: any;
-let selectedCoin = ref(supportedCoins[0]);
 
 const coinPrice = ref(0);
 const coinDate = ref("");
 const isRealtime = ref(true);
+const selectedCoinId = ref(supportedCoins[0].id);
 
 const isValidDate = computed(() => {
   console.log({ coinDate: coinDate.value });
@@ -43,7 +44,7 @@ const isValidDate = computed(() => {
 });
 
 async function storeCoinPrice() {
-  const price = await getCoinCurrentPrice(selectedCoin.value.id);
+  const price = await getCoinCurrentPrice(selectedCoinId.value);
   coinPrice.value = price;
 }
 
@@ -66,7 +67,7 @@ function searchHistory() {
   const [yyyy, mm, dd] = coinDate.value.split("-");
   const correctDateString = [dd, mm, yyyy].join("-");
 
-  searcHistoricalPrice(selectedCoin.value.id, correctDateString).then(
+  searcHistoricalPrice(selectedCoinId.value, correctDateString).then(
     (price) => {
       coinPrice.value = price;
     }
@@ -78,31 +79,12 @@ startRealtimePriceInterval();
 
 <template>
   <main class="flex flex-col h-screen justify-center items-center">
-    <div class="flex items-center justify-center mb-4 bg-white/10 rounded">
-      <div
-        :key="coin.id"
-        v-for="coin in supportedCoins"
-        class="p-2"
-        :class="{ 'bg-black/40': coin.id === selectedCoin.id }"
-      >
-        <input
-          type="radio"
-          name="coin"
-          v-model="selectedCoin"
-          :id="'coin-' + coin.id"
-          :value="coin"
-          class="hidden"
-        />
-        <label
-          :for="'coin-' + coin.id"
-          class="cursor-pointer font-semibold"
-          :class="{
-            'text-purple-500 cursor-default': coin.id === selectedCoin.id,
-          }"
-          >{{ coin.symbol.toUpperCase() }}</label
-        >
-      </div>
-    </div>
+    <Selector
+      v-model="selectedCoinId"
+      :items="
+        supportedCoins.map((coin) => ({ id: coin.id, label: coin.symbol }))
+      "
+    />
 
     <div class="flex gap-x-2">
       <button
