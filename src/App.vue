@@ -29,7 +29,7 @@ const formattedCoinPrice = computed(() => {
 });
 
 const formattedCoinPriceDate = computed(() => {
-  if (!shownCoinPriceDate.value) return "----";
+  if (!shownCoinPriceDate.value || isLoadingCoinPrice.value) return "----";
 
   return shownCoinPriceDate.value.toLocaleDateString(
     "pt-BR",
@@ -71,12 +71,15 @@ function clearRealtimePriceInterval() {
   isRealtime.value = false;
 }
 
-function startRealtimePriceInterval() {
-  storeCoinPrice();
+async function startRealtimePriceInterval() {
+  isRealtime.value = true;
+  isLoadingCoinPrice.value = true;
+
+  await storeCoinPrice();
   realtimePriceInterval = setInterval(storeCoinPrice, 5000);
 
-  isRealtime.value = true;
   coinDate.value = "";
+  isLoadingCoinPrice.value = false;
 }
 
 async function searchHistory() {
