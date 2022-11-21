@@ -21,7 +21,7 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="flex items-center justify-center mb-4 bg-white/10 rounded">
+  <div class="flex items-center justify-center bg-white/10 rounded">
     <div
       :key="item.id"
       v-for="item in items"

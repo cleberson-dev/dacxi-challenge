@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import ButtonGroup from "./components/ButtonGroup.vue";
 import {
   getCoinCurrentPrice,
@@ -36,6 +36,15 @@ const coinPrice = ref(0);
 const coinDate = ref("");
 const isRealtime = ref(true);
 const selectedCoinId = ref(supportedCoins[0].id);
+const shownCoinPriceDate = ref<Date>();
+
+const formattedCoinPriceDate = computed(() => {
+  if (!shownCoinPriceDate.value) return "----";
+
+  if (!isRealtime.value) return shownCoinPriceDate.value.toLocaleDateString();
+
+  return shownCoinPriceDate.value.toISOString();
+});
 
 const isValidDate = computed(() => {
   console.log({ coinDate: coinDate.value });
@@ -43,9 +52,19 @@ const isValidDate = computed(() => {
   return !!coinDate.value.match(/\d{4}-\d{2}-\d{2}/);
 });
 
+watch(selectedCoinId, () => {
+  if (isRealtime.value) return;
+
+  searchHistory();
+});
+
 async function storeCoinPrice() {
+  if (!isRealtime.value) return;
+
   const price = await getCoinCurrentPrice(selectedCoinId.value);
+
   coinPrice.value = price;
+  shownCoinPriceDate.value = new Date();
 }
 
 function clearRealtimePriceInterval() {
@@ -70,6 +89,7 @@ function searchHistory() {
   searcHistoricalPrice(selectedCoinId.value, correctDateString).then(
     (price) => {
       coinPrice.value = price;
+      shownCoinPriceDate.value = new Date(+yyyy, +mm - 1, +dd);
     }
   );
 }
@@ -86,34 +106,43 @@ startRealtimePriceInterval();
       "
     />
 
-    <div class="flex gap-x-2">
+    <div
+      class="flex flex-col items-center p-8 my-4 w-full rounded border border-solid border-white/5"
+    >
       <button
         @click="startRealtimePriceInterval"
-        class="select-none cursor-pointer disabled:cursor-default"
+        class="select-none cursor-pointer font-semibold disabled:cursor-default"
         :class="{ 'text-red-600': isRealtime }"
         :disabled="isRealtime"
       >
         LIVE
       </button>
+
+      <p class="text-5xl font-bold text-purple-500 mb-2">
+        {{ formatToCurrency(coinPrice) }}
+      </p>
+
+      <p class="opacity-40">
+        <small>{{ formattedCoinPriceDate }}</small>
+      </p>
     </div>
 
-    <p class="text-5xl font-bold text-purple-500 mb-4">
-      {{ formatToCurrency(coinPrice) }}
-    </p>
-
-    <input
-      class="rounded p-2"
-      :style="{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }"
-      type="date"
-      v-model="coinDate"
-    />
-    <button
-      class="disabled:opacity-25 disabled:cursor-default cursor-pointer mt-2 bg-slate-300 text-black px-3 py rounded"
-      @click="searchHistory"
-      :disabled="!isValidDate"
-    >
-      Search
-    </button>
+    <div class="flex flex-col items-center">
+      <label>Pick a date</label>
+      <input
+        class="rounded p-2"
+        :style="{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }"
+        type="date"
+        v-model="coinDate"
+      />
+      <button
+        class="disabled:opacity-40 disabled:cursor-default font-semibold cursor-pointer mt-2 bg-blue-500 text-black px-4 py-1 rounded"
+        @click="searchHistory"
+        :disabled="!isValidDate"
+      >
+        Search
+      </button>
+    </div>
   </main>
 </template>
 
