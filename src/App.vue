@@ -32,6 +32,7 @@ const supportedCoins = [
 
 let realtimePriceInterval: any;
 
+const isLoadingCoinPrice = ref(true);
 const coinPrice = ref(0);
 const coinDate = ref("");
 const isRealtime = ref(true);
@@ -53,6 +54,7 @@ const isValidDate = computed(() => {
 });
 
 watch(selectedCoinId, () => {
+  isLoadingCoinPrice.value = true;
   if (isRealtime.value) return;
 
   searchHistory();
@@ -65,6 +67,7 @@ async function storeCoinPrice() {
 
   coinPrice.value = price;
   shownCoinPriceDate.value = new Date();
+  isLoadingCoinPrice.value = false;
 }
 
 function clearRealtimePriceInterval() {
@@ -83,6 +86,8 @@ function startRealtimePriceInterval() {
 function searchHistory() {
   clearRealtimePriceInterval();
 
+  isLoadingCoinPrice.value = true;
+
   const [yyyy, mm, dd] = coinDate.value.split("-");
   const correctDateString = [dd, mm, yyyy].join("-");
 
@@ -90,6 +95,7 @@ function searchHistory() {
     (price) => {
       coinPrice.value = price;
       shownCoinPriceDate.value = new Date(+yyyy, +mm - 1, +dd);
+      isLoadingCoinPrice.value = false;
     }
   );
 }
@@ -119,7 +125,7 @@ startRealtimePriceInterval();
       </button>
 
       <p class="text-5xl font-bold text-purple-500 mb-2">
-        {{ formatToCurrency(coinPrice) }}
+        {{ isLoadingCoinPrice ? "----" : formatToCurrency(coinPrice) }}
       </p>
 
       <p class="opacity-40">
