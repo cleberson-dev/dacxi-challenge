@@ -30,7 +30,7 @@ const supportedCoins = [
 ];
 
 let realtimePriceInterval: any;
-let selectedCoin = supportedCoins[0];
+let selectedCoin = ref(supportedCoins[0]);
 
 const coinPrice = ref(0);
 const coinDate = ref("");
@@ -43,7 +43,7 @@ const isValidDate = computed(() => {
 });
 
 async function storeCoinPrice() {
-  const price = await getCoinCurrentPrice(selectedCoin.id);
+  const price = await getCoinCurrentPrice(selectedCoin.value.id);
   coinPrice.value = price;
 }
 
@@ -66,9 +66,11 @@ function searchHistory() {
   const [yyyy, mm, dd] = coinDate.value.split("-");
   const correctDateString = [dd, mm, yyyy].join("-");
 
-  searcHistoricalPrice(selectedCoin.id, correctDateString).then((price) => {
-    coinPrice.value = price;
-  });
+  searcHistoricalPrice(selectedCoin.value.id, correctDateString).then(
+    (price) => {
+      coinPrice.value = price;
+    }
+  );
 }
 
 startRealtimePriceInterval();
@@ -91,7 +93,12 @@ startRealtimePriceInterval();
       {{ formatToCurrency(coinPrice) }}
     </p>
 
-    <input class="rounded text-black" type="date" v-model="coinDate" />
+    <input
+      class="rounded p-2"
+      :style="{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }"
+      type="date"
+      v-model="coinDate"
+    />
     <button
       class="disabled:opacity-25 disabled:cursor-default cursor-pointer mt-2 bg-slate-300 text-black px-3 py rounded"
       @click="searchHistory"
@@ -100,10 +107,29 @@ startRealtimePriceInterval();
       Search
     </button>
 
-    <div class="flex items-center justify-center mt-4">
-      <div :key="coin.id" v-for="coin in supportedCoins">
-        <input type="radio" name="coin" :value="coin" v-model="selectedCoin" />
-        <label>{{ coin.symbol.toUpperCase() }}</label>
+    <div class="flex items-center justify-center mt-4 bg-white/10 rounded">
+      <div
+        :key="coin.id"
+        v-for="coin in supportedCoins"
+        class="p-2"
+        :class="{ 'bg-black/40': coin.id === selectedCoin.id }"
+      >
+        <input
+          type="radio"
+          name="coin"
+          v-model="selectedCoin"
+          :id="'coin-' + coin.id"
+          :value="coin"
+          class="hidden"
+        />
+        <label
+          :for="'coin-' + coin.id"
+          class="cursor-pointer font-semibold"
+          :class="{
+            'text-purple-500 cursor-default': coin.id === selectedCoin.id,
+          }"
+          >{{ coin.symbol.toUpperCase() }}</label
+        >
       </div>
     </div>
   </main>
