@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import Selector from "./components/Selector.vue";
+import ButtonGroup from "./components/ButtonGroup.vue";
 import {
   getCoinCurrentPrice,
   formatToCurrency,
@@ -79,7 +79,7 @@ startRealtimePriceInterval();
 
 <template>
   <main class="flex flex-col h-screen justify-center items-center">
-    <Selector
+    <ButtonGroup
       v-model="selectedCoinId"
       :items="
         supportedCoins.map((coin) => ({ id: coin.id, label: coin.symbol }))

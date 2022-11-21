@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { ref } from "vue";
 
-interface Item {
+export interface Item {
   id: string;
   label: string;
 }
 
-interface Props {
+export interface Props {
   items: Item[];
   modelValue: Item["id"];
 }
